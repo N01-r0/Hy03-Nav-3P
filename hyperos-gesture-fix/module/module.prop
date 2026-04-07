@@ -1,0 +1,6 @@
+id=hyperos_gesture_nav
+name=HyperOS Gesture Navigation Fix
+version=v1.0
+versionCode=1
+author=or10n
+description=Enables fullscreen gesture navigation with third-party launchers on HyperOS 3. Patches MiuiHome at install time and maintains gesture settings via background daemon.

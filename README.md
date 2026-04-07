@@ -203,3 +203,16 @@ PLEASE report any issues with as much information as you can gather!!!! Thank yo
 - **XDA Forums** — [root gesture tutorial](https://xdaforums.com/t/root-tutorial-working-gestures-with-any-launcher-for-every-miui-hyperos-device.4667872/) and [xiaomi.eu community](https://xiaomi.eu/community/threads/forcing-gesture-navigation-on-foreign-launchers.76170/)
 
 Hopefully with everyone's input we can build something alot cleaner & smaller. I dont see why we need to route through the system launcher at all & so will be building another daemon that strictly has its own gestures, so there is no reliance on the system launcher whatsoever. 
+
+
+## Checksums (SHA256)
+
+| File | SHA256 |
+|------|--------|
+| `HyperOS-Gesture-Nav-Fix-v1.0.zip` | `fa80e22365c8f4bcdb994bd221f4444b23f6f092cf0f570512401bbe3fe1c386` |
+| `README.md` | `94b990930541da6f9bdaba6ac640ace7466f4d7442a2e7cf5ed45b6af04c8317` |
+| `SETUP_LINUX.md` | `3cf8e06b9c794b05d255fee6ef8978d43154477e0137625716be55ea990764ae` |
+| `SETUP_TERMUX.md` | `17571d575298991b8477229711a8c39bb11e1ae4e2221fa77ccf5e75cf2117b5` |
+| `SETUP_WINDOWS.md` | `45ac3e16354c0d89bc2db87d526b6a1ba4ddaa344d99788f671121dda6828155` |
+| `install.sh` | `cbb323184bb49f5c55631e1f1e36ccefd7698fcfb7df620c196a64661492d38e` |
+| `install_termux.sh` | `8ffaf6edd877eecd31f7227cf70f0fbbb5c057c0404632544f4a18d44ab51f82` |

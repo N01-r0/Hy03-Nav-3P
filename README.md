@@ -1,209 +1,102 @@
-# HyperOS Gesture Navigation Fix for Third-Party Launchers
+# HyperOS Gesture Navigation Fix
 
-**Force native HyperOS gesture navigation to work with any third-party launcher on rooted Xiaomi devices.**
+**Native HyperOS gestures — back, home, recents — with any third-party launcher on rooted Xiaomi devices.**
 
-Back gestures, home swipe, and recent apps — all working with Smart Launcher, Lawnchair, Nova, Niagara, or any launcher of your choice.
+> HyperOS 3 / MiuiHome 6.x · KernelSU, KernelSU-Next, Magisk, APatch
 
-NOTE: **Expected to work on:** Any HyperOS 3 device with MiuiHome 6.x (Xiaomi/Redmi/Poco). If you do not meet those requirements please dont test this :).
-
+---
 
 ## Requirements
 
-### On your phone (Still in testing phase, might not work)
-- **Rooted**: KernelSU, KernelSU-Next, Magisk, or APatch
-- **APK signature bypass**: `DisableApkVerification`, `CorePatch`, or similar (required because we modify DEX files in the APK without re-signing)
+**Phone:** Root + APK signature bypass (`DisableApkVerification`, `CorePatch`, or similar)
 
-### On your computer 
-- `adb` — Android platform-tools
-- `apktool` — APK decompilation/recompilation
-- `smali` — DEX reassembly (part of libsmali-java)
-- `python3` — runs the universal patcher
-- `zip` — packages the module
+**Computer:** `adb` · `apktool` · `smali` · `python3` · `zip`
+→ Setup guides: [Linux](SETUP_LINUX.md) · [Windows](SETUP_WINDOWS.md) · [Termux](SETUP_TERMUX.md)
 
-Instructions for installing all the requirements can be found below:
-
-Windows: SETUP_WINDOWS.md
-Linux: SETUP_LINUX.md
-Termux: SETUP_TERMUX.md (in testing phasing)
+---
 
 ## Quick Start
 
-Once you have installed everything correctly, connect your device via USB with ADB debugging enabled, then:
+Connect your device via USB with ADB debugging enabled, then:
 
 ```bash
+git clone https://github.com/Or10n/hyperos-gesture-fix
+cd hyperos-gesture-fix
 ./install.sh
 ```
 
-That's it. It pulls your stock APK, patches it, builds a module, installs it, and asks to reboot. After reboot, set any launcher as default.
+Pulls your stock APK, patches it, builds and installs a KSU/Magisk module, prompts reboot. After reboot, set any launcher as default — gestures work natively.
 
-### The Problem
-
-Xiaomi embedded the entire gesture engine directly into `com.miui.home` (the system launcher APK), rather than using Android's standard SystemUI-based system. When a third-party launcher becomes default, MiuiHome detects it's no longer the active home app and:
-
-1. Tears down all gesture input surfaces (`NavStubView`, `GestureStubLeft`, `GestureStubRight`)
-2. Forces the system back to 3-button navigation
-3. Resets `force_fsg_nav_bar` and `navigation_mode` settings
-
-This makes gestures physically impossible with any non-stock launcher.
-
-### The Fix
-
-The installer patches MiuiHome's smali code so it **never detects the launcher switch**, then installs a KernelSU/Magisk module that keeps everything in place across reboots.
-
-#### 6 Smali Patches (applied to MiuiHome APK)
-
-| # | What It Does |
-|---|---|
-| 1 | `isUseMiuiHomeAsDefaultHome()` always returns `true` — MiuiHome never detects a third-party launcher |
-| 2 | `isUsePocoHomeAsDefaultHome()` always returns `true` — same fix for Poco/Redmi devices |
-| 3 | `setIsUseMiuiHomeAsDefaultHome(false)` forced to `true` — blocks runtime kill signal |
-| 4 | Init-time field `mIsUseMiuiHomeAsDefaultHome` forced to `true` — correct from boot |
-| 5 | Recents fallback launches `RecentsActivity` directly instead of going home |
-| 6 | Bottom gesture zone increased from 20.5dp to 35dp — 73% larger touch target |
-
-#### Runtime Module (service.sh)
-
-On every boot, the module:
-- **Bind-mounts** the patched APK over the stock one
-- **Removes** any MiuiHome updates from `/data/app/` (which would override the patch)
-- **Monitors** gesture settings every 5 seconds, re-applying them if the system resets them
-
-
-
-**Ubuntu/Debian:**
+**On-device (no computer needed):**
 ```bash
-sudo apt install apktool libsmali-java python3 zip android-tools-adb
+./install_termux.sh
 ```
+> ⚠️ Termux installer is still in testing.
 
-**Arch:**
-```bash
-yay -S apktool smali python zip android-tools
-```
+---
 
-**macOS (Homebrew):**
-```bash
-brew install apktool smali python3 zip
-```
+## How It Works
+
+HyperOS bakes its entire gesture engine into `com.miui.home`. When any third-party launcher becomes default, MiuiHome tears down all gesture surfaces and forces 3-button nav.
+
+The installer patches 6 points in MiuiHome's smali (so it never detects a launcher switch), then installs a module that bind-mounts the patched APK on boot, removes any OTA overrides, and monitors gesture settings every 5s. Regex-based matching — not byte patterns — makes it resilient across builds.
+
+---
 
 ## Compatibility
 
-The patcher uses **method-signature matching with regex** rather than exact byte patterns, making it resilient across different MiuiHome builds:
-
-- Builds with or without `.line` debug directives
-- Files in any `smali_classesN/` directory (DEX redistribution between builds)
-- HyperOS 3 (`BuildConfigUtils`) and HyperOS 2/MIUI (`Utilities`) class paths
-- Variable float constants in gesture height methods
-- Register names extracted dynamically (not hardcoded)
-
-**Tested on:**
-
-| APK | Build | `.line` directives | Result |
-|---|---|---|---|
-| Stock xiaomi.eu (Xiaomi 17 Ultra) | 6.01.05.2012 | No | 6/6 |
-| Stock xiaomi.eu (different pull) | 6.01.05.2007 | Yes | 6/6 |
-| Kashi's Modded HyperOS Launcher v6.7 | 6.01.05.2235 | Yes | 6/6 |
-
-**Works with:** KernelSU, KernelSU-Next, Magisk, APatch
-
-**Expected to work on:** Any HyperOS 3 device with MiuiHome 6.x (Xiaomi/Redmi/Poco).
-
-## Tested Configuration
-
-| Component | Version |
-|---|---|
-| Device | Xiaomi 17 Ultra |
-| OS | HyperOS 3 (OS3.0) |
-| Android | 16 (API 36) |
-| ROM | xiaomi.eu Global |
-| Root | KernelSU-Next (LKM mode) |
-| Launchers tested | Smart Launcher 6, Lawnchair, Nova, Niagara |
-
-## File Structure
-
-```
-hyperos-gesture-fix/
-├── install.sh               # One-command installer (run this)
-├── README.md                # This file
-├── tools/
-│   ├── patcher.py           # Universal patch engine (Python, regex-based)
-│   └── patcher.sh           # Shell fallback patcher (same logic, pure sh)
-└── module/                  # KSU/Magisk module template
-    ├── module.prop
-    ├── service.sh            # Boot daemon (bind-mount + gesture monitor)
-    ├── post-fs-data.sh       # Early boot properties
-    ├── system.prop           # Persistent system properties
-    ├── uninstall.sh          # Cleanup on module removal
-    └── META-INF/             # Magisk/KSU module installer
-```
-
-## Gesture Quality
-
-| Gesture | Quality | Notes |
+| APK | Build | Result |
 |---|---|---|
-| **Back (edge swipes)** | Native | Handled by SystemUI + MiuiHome's GestureStubView. Identical to stock. |
-| **Home (swipe up)** | Good | MiuiHome animation plays, goes to your third-party launcher. |
-| **Recents (swipe up + hold)** | Functional | Opens RecentsActivity. Brief transition but works correctly. |
+| Stock xiaomi.eu (Xiaomi 17 Ultra) | 6.01.05.2012 | ✅ 6/6 patches |
+| Stock xiaomi.eu | 6.01.05.2007 | ✅ 6/6 patches |
+| Kashi's Modded HyperOS Launcher v6.7 | 6.01.05.2235 | ✅ 6/6 patches |
+
+**Tested on:** Xiaomi 17 Ultra · HyperOS 3 (Android 16) · xiaomi.eu Global · KernelSU-Next
+**Launchers:** Smart Launcher 6, Lawnchair, Nova, Niagara
+
+---
 
 ## Troubleshooting
 
-### Gestures stop working after a system update
-The OTA likely replaced MiuiHome. Just re-run the installer:
+**Gestures stopped after OTA?**
 ```bash
-./install.sh
+./install.sh   # re-patches the new APK
 ```
-It pulls the new stock APK, patches it fresh, and reinstalls the module.
 
-### MiuiHome crashes on boot
-Disable the module to recover, then report issue to me.
+**MiuiHome crashing on boot?**
 ```bash
 adb wait-for-device
 adb shell "su -c 'touch /data/adb/modules/hyperos_gesture_nav/disable'"
 adb reboot
 ```
 
-### Verify everything is working
+**Verify it's working:**
 ```bash
-# Gesture input windows present
-adb shell "dumpsys input | grep GestureStub"
-# Expected: GestureStub, GestureStubLeft, GestureStubRight
-
-# APK loading from system (patched) location
-adb shell "pm path com.miui.home"
-# Expected: package:/product/priv-app/MiuiHome/MiuiHome.apk
-
-# Settings correct
-adb shell "settings get global force_fsg_nav_bar"   # Expected: 1
-adb shell "settings get secure navigation_mode"       # Expected: 2
+adb shell "dumpsys input | grep GestureStub"          # expect: GestureStub, Left, Right
+adb shell "pm path com.miui.home"                      # expect: /product/priv-app/MiuiHome/...
+adb shell "settings get global force_fsg_nav_bar"      # expect: 1
+adb shell "settings get secure navigation_mode"        # expect: 2
 ```
 
-### Check the daemon log
+**Check daemon log:**
 ```bash
 adb shell "su -c 'cat /data/adb/modules/hyperos_gesture_nav/daemon.log'"
 ```
 
-## Reverting/Further Issues
+**To revert:** Uninstall the module from KernelSU Manager / Magisk and reboot. No permanent system changes.
 
-Uninstall the module from your root manager (KernelSU Manager / Magisk app) and reboot. Stock behavior is fully restored — no permanent changes are made to your system partition.
+---
 
-PLEASE report any issues with as much information as you can gather!!!! Thank you
-
-##  Technical Notes
-
-1. **Patch pattern fragility**: The original patches were written against a modded APK that preserves `.line` debug directives in smali. Fixed by building a regex-based patcher that matches method signatures and tolerates structural differences.
-
-2. **On-device decompilation blocked**: HyperOS 3 aggressively kills unregistered `app_process` instances. baksmali gets `SIGKILL`'d (exit 137) after ~450 files, well before reaching the target classes. This isn't OOM (7.6GB free) and persists even with `oom_score_adj -1000`, `setsid`, `nohup`, and phantom process killer disabled. Solved by moving decompilation to the laptop.
-
-3. **Invisible /data/app/ override**: MiuiHome updates are stored in `/data/app/`, which Android prioritizes over `/product/priv-app/`. A perfectly patched and bind-mounted system APK gets silently ignored. The module's `service.sh` now detects and removes these updates on every boot.
-
-## Credits/Whats next?
+## Credits
 
 - **[AnyLauncher](https://github.com/tiann/AnyLauncher)** by weishu/tiann
 - **[FuckMIUIGesture](https://github.com/HCGStudio/FuckMIUIGesture)** by HCGStudio
 - **[QuickSwitch](https://github.com/nickaknudson/QuickSwitch)** by nickaknudson
-- **XDA Forums** — [root gesture tutorial](https://xdaforums.com/t/root-tutorial-working-gestures-with-any-launcher-for-every-miui-hyperos-device.4667872/) and [xiaomi.eu community](https://xiaomi.eu/community/threads/forcing-gesture-navigation-on-foreign-launchers.76170/)
+- **XDA** — [root gesture tutorial](https://xdaforums.com/t/root-tutorial-working-gestures-with-any-launcher-for-every-miui-hyperos-device.4667872/) · [xiaomi.eu community](https://xiaomi.eu/community/threads/forcing-gesture-navigation-on-foreign-launchers.76170/)
 
-Hopefully with everyone's input we can build something alot cleaner & smaller. I dont see why we need to route through the system launcher at all & so will be building another daemon that strictly has its own gestures, so there is no reliance on the system launcher whatsoever. 
+Issues and contributions welcome. Long-term goal: a standalone gesture daemon with zero dependency on the system launcher.
 
+---
 
 ## Checksums (SHA256)
 
@@ -216,3 +109,7 @@ Hopefully with everyone's input we can build something alot cleaner & smaller. I
 | `SETUP_WINDOWS.md` | `45ac3e16354c0d89bc2db87d526b6a1ba4ddaa344d99788f671121dda6828155` |
 | `install.sh` | `cbb323184bb49f5c55631e1f1e36ccefd7698fcfb7df620c196a64661492d38e` |
 | `install_termux.sh` | `8ffaf6edd877eecd31f7227cf70f0fbbb5c057c0404632544f4a18d44ab51f82` |
+
+---
+
+**Author**: [Or10n](https://github.com/Or10n)

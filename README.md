@@ -1,3 +1,6 @@
+#Update V3.0:
+
+-Changed to new vector hook module instead for easier compatability
 
 #Update V2.0:
 

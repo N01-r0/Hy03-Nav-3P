@@ -1,4 +1,58 @@
-# HyperOS Gesture Navigation Fix
+
+#Update V2.0:
+
+# HyperOS Gesture Daemon
+
+- This project now ships as a KernelSU module with:
+- a gesture daemon
+- a lightweight overlay APK
+- boot persistence
+- automatic gesture-nav reapply
+
+## Requirements
+
+- HyperOS 2 or 3
+- Android 13+
+- Root
+- KernelSU / KernelSU-Next
+
+## Install
+
+1. Install the latest `hyperos-gesture-daemon-ksu-*.zip` in KernelSU.
+2. Reboot.
+3. Set your third-party launcher as default if needed.
+
+## Behavior
+
+- Third-party launcher active:
+  custom gesture daemon + overlay run
+- `com.miui.home` active:
+  custom daemon + overlay park automatically
+- Module enabled:
+  gestural navigation is kept forced on
+
+## Tested
+
+- Tested on HyperOS 3
+- Designed for HyperOS 2 / 3
+- Tested launchers: Smart Launcher, Nova, Lawnchair, Niagara
+
+## Notes
+
+- This module does not use the real MiuiHome/Quickstep recents animation pipeline. This would be a seperate project entirely.
+- If Xiaomi changes gesture/nav internals on a future build, I will update the module.
+
+## Uninstall
+
+Disable or uninstall the module in KernelSU, then reboot.
+
+
+
+
+
+
+
+# HyperOS Gesture Navigation Fix (V1.0) (Previous Method)
 
 **Native HyperOS gestures — back, home, recents — with any third-party launcher on rooted Xiaomi devices.**
 
@@ -112,4 +166,3 @@ Issues and contributions welcome. Long-term goal: a standalone gesture daemon wi
 
 ---
 
-**Author**: [Or10n](https://github.com/Or10n)

@@ -3,7 +3,7 @@
 
 # HyperOS Gesture Daemon
 
-- This project now ships as a KernelSU module with:
+- This project now ships as a KernelSU/KernelSU next module with:
 - a gesture daemon
 - a lightweight overlay APK
 - boot persistence
@@ -18,7 +18,7 @@
 
 ## Install
 
-1. Install the latest `hyperos-gesture-daemon-ksu-*.zip` in KernelSU.
+1. Install the latest `hyperos-gesture-daemon-ksu-*.zip` under releases. Flash via KernelSU/SUnext(optional) magisk.
 2. Reboot.
 3. Set your third-party launcher as default if needed.
 
@@ -41,6 +41,7 @@
 
 - This module does not use the real MiuiHome/Quickstep recents animation pipeline. This would be a seperate project entirely.
 - If Xiaomi changes gesture/nav internals on a future build, I will update the module.
+- NOT tested on Magisk, however much of the logic/expectations are the same, this isnt going to break anything, so if you're using magisk try it & then let me know via the issues tab if it doesnt work.
 
 ## Uninstall
 

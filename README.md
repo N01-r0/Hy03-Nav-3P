@@ -8,7 +8,7 @@
 - Reboot
 
 # Uninstall
-- Simply uninstall the apk, reboot & you're back to stock
+- You can uninstall the apk or via lsposed & then reboot. 
 
 
 # Please be advised that this is still in testing phases so some compatability might not work. Test on your own accord.

@@ -1,3 +1,16 @@
+
+# Update 3.1.0
+
+- Added support for native haptics
+- Logic added for smoother recents 
+
+# Scoped for V3.2:
+
+- Swipe to go home is instantaneous. This needs correction
+- Home bs recents reliant on NavstubView -- Needs native path instead
+-- Recents flashes home, due to reliance above. Logic needs further correction to improve this or cancel it out completely. 
+
+
 # Update V3.0 whats new?
 
 - Changed to new vector hook module instead for easier compatability, works on rooted xiaomi devices running HyperOS2/3. Runs using new vector 101 API.

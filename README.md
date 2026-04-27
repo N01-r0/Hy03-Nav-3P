@@ -10,13 +10,6 @@
 - Added support for native haptics
 - Logic added for smoother recents 
 
-# Scoped for V3.2:
-
-- Swipe to go home is instantaneous. This needs correction
-- Home bs recents reliant on NavstubView -- Needs native path instead
--- Recents flashes home, due to reliance above. Logic needs further correction to improve this or cancel it out completely. 
-
-
 # V3.0 whats new?
 
 - Compatability with 101 API, changed from 100
